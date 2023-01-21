@@ -7,48 +7,44 @@ const BASE_URL = 'https://api.frankfurter.app/latest'
 function CurrencyListing() {
   const [currencyOptions, setCurrencyOptions] = useState([])
   const [fromCurrency, setFromCurrency] = useState()
-  const [toCurrency, setToCurrency] = useState()
-  const [exchangeRate, setExchangeRate] = useState()
+  //const [toCurrency, setToCurrency] = useState()
+  //const [exchangeValues, setExchangeValue] = useState()
   const [amount, setAmount] = useState(1)
-  const [amountInFromCurrency, setAmountInFromCurrency] = useState(true)
+  let resultCurrencies = {}
+  let resultValues = {}
 
-  let toAmount, fromAmount
-  if (amountInFromCurrency) {
-    fromAmount = amount
-    toAmount = amount * exchangeRate
-  } else {
-    toAmount = amount
-    fromAmount = amount / exchangeRate
-  }
+  //const [amountInFromCurrency, setAmountInFromCurrency] = useState(true)
+
+
+  let fromAmount = 1
 
   useEffect(() => {
     fetch(BASE_URL)
     .then(res => res.json())
     .then(data => {
-      const firstCurrency = Object.keys(data.rates)[0]
       setCurrencyOptions([data.base, ...Object.keys(data.rates)])
       setFromCurrency(data.base)
-      setToCurrency(firstCurrency)
-      setExchangeRate(data.rates[firstCurrency])
     })
   }, [])
 
   useEffect(() => {
-    if (fromCurrency != null & toCurrency != null) {
-      fetch(`${BASE_URL}?from=${fromCurrency}&to=${toCurrency}`)
-      .then(res => res.json())
-      .then(data => setExchangeRate(data.rates[toCurrency]))
+    if (fromCurrency != null) {
+      getResults()
     }
-  }, [fromCurrency, toCurrency])
+  }, [fromCurrency])
+
+  const getResults = async () => {
+    const response = await fetch(`${BASE_URL}?amount=${amount}&from=${fromCurrency}`)
+    .then((response) => response.json());
+    resultCurrencies = Object.keys(response.rates);
+    resultValues = Object.values(response.rates);
+    console.log(resultCurrencies)
+    console.log(resultValues)
+  };
 
   function handleFromAmountChange(e) {
     setAmount(e.target.value)
-    setAmountInFromCurrency(true)
-  }
-
-  function handleToAmountChange(e) {
-    setAmount(e.target.value)
-    setAmountInFromCurrency(false)
+    //setAmountInFromCurrency(true)
   }
 
   return (
